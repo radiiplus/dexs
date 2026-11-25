@@ -1,0 +1,49 @@
+# Antfarm (Ethereum)
+
+## Target and source attribution
+
+- GeckoTerminal identifier: `antfarm-ethereum`. The sampled listing includes an ATF/WETH pool at `0x59540c3d75d70cc4cf822c7581b888390effa92`; review also covers the shared factory/router/pair implementation rather than claiming every listed pool was individually exercised.
+- The project's Ethereum deployment page identifies factory `0xE48AEE124F9933661d4DD3Eb265fA9e153e32CBe`, router `0x6D9f0eb21D77C6d24bE49a579508471E937D5418`, Position NFT `0x9fF19be8FA1F8Cf8a017051DAA5DFB491ac2cCEE`, and ATF `0x518b63Da813D46556FEa041A88b52e3CAa8C16a8`. The project docs describe Antfarm as a Uniswap V2-derived AMM whose swap fees are denominated in ATF.
+- The factory, router, position contract, and ATF token have verified Blockscout source. Factory compilation metadata reports Solidity `0.8.10`, optimizer enabled for 1,000 runs, and literal source content. The factory's verified compiler input includes `AntfarmPair.sol`, `AntfarmAtfPair.sol`, and `AntfarmOracle.sol` as additional source files; its `createPair` deploys these exact creation-code artifacts using CREATE2. There are no proxies in these entry contracts.
+- The former public source repository is identified by the project's January 2023 audit as [`AntfarmFinance/contracts`](https://github.com/AntfarmFinance/contracts), with paths `antfarm/AntfarmFactory.sol`, `antfarm/AntfarmOracle.sol`, `antfarm/AntfarmPair.sol`, `antfarm/AntfarmAtfPair.sol`, and `antfarm/AntfarmPosition.sol`. That repository currently returns 404, so the live repository files and commit cannot be relied on as the reviewed version. The assessment uses the verified deployment source below. The audit report is useful as historical attribution, not as a substitute for current implementation evidence.
+- Deployment source references: [Factory verified source and embedded pair sources](https://eth.blockscout.com/address/0xe48aee124f9933661d4dd3eb265fa9e153e32cbe#code), [Router verified source](https://eth.blockscout.com/address/0x6d9f0eb21d77c6d24be49a579508471e937d5418#code), [Position verified source](https://eth.blockscout.com/address/0x9ff19be8fa1f8cf8a017051daa5dfb491ac2ccee#code), [ATF token source](https://eth.blockscout.com/address/0x518b63da813d46556fea041a88b52e3caa8c16a8#code), [sample ATF/WETH pool](https://www.geckoterminal.com/eth/pools/0x59540c3d75d70cc4cf822c7581b888390effa92), and [Antfarm Ethereum pool listing](https://www.geckoterminal.com/eth/antfarm-ethereum/pools).
+- The exact affected source files are `contracts/antfarm/AntfarmRouter.sol` and `contracts/antfarm/AntfarmAtfPair.sol`. The verified Router page exposes its source directly; the verified Factory page's compiler-input source list contains the pair file. The corresponding historical repository file URLs are [AntfarmRouter.sol](https://github.com/AntfarmFinance/contracts/blob/main/antfarm/AntfarmRouter.sol) and [AntfarmAtfPair.sol](https://github.com/AntfarmFinance/contracts/blob/main/antfarm/AntfarmAtfPair.sol), currently unavailable with the deleted/private repository.
+
+## Architecture and execution map
+
+- `AntfarmFactory.createPair(tokenA, tokenB, fee)` validates one of eight fee values, sorts ATF as token0 whenever it participates, rejects duplicate pairs, deploys `AntfarmAtfPair` for ATF pools or `AntfarmPair` otherwise, records the pair under both token orders, then initializes it. ATF pools disallow the 100% fee because the pair's output-side fee formula divides by `1000 - fee`.
+- The router offers exact-input and exact-output routes plus fee-on-transfer variants. It transfers the first input to the first pair, derives each hop's output, moves intermediate outputs directly to the next pair, and checks aggregate `maxFee` plus final `amountOutMin`. `AntfarmPosition` wraps pair position balances in transferable ERC-721 positions; it routes deposits, withdrawals, locks, delegates, and dividend claims.
+- Pair liquidity is held directly in each pair. The ATF pair tracks reserves excluding `antfarmTokenReserve`, where claimed-to-LP ATF fees are held; 85% of each fee is attributed to LPs and 15% is burned. The non-ATF pair measures a fee against an ATF oracle and requires the caller to transfer that ATF amount before the swap. Pair swaps are reentrancy-guarded and update reserves from observed balances.
+- For an ATF pool, the pair's fee is `amount0In * fee / (1000 + fee) + amount0Out * fee / (1000 - fee)`. Since ATF is token0, an input-token-to-ATF swap charges against its ATF output. The standard router route computes that output-side fee from `amounts[i + 1]`.
+- Critical invariants reviewed: pair reserves must exclude outstanding LP-fee claims but include all non-fee balances; LP position units and total supply must remain consistent; ATF fee claims cannot exceed `antfarmTokenReserve`; each swap must preserve the constant-product invariant after the correct fee treatment; router `maxFee` must bound the ATF fee actually charged across all hops; failed slippage or fee checks must roll back transfers and pair accounting.
+
+## Entry points and transitions reviewed
+
+- Factory pair creation, token sorting, fee choices, CREATE2 deployment, and pair mapping.
+- Pair initialization, mint, burn, swap, sync, skim, position accounting, fee accumulator, fee distribution/burn, and ATF-pair oracle updates.
+- Router ordinary exact-input/output swaps, fee-on-transfer exact-input paths, intermediate-hop settlement, ATF input/output fee calculations, `maxFee`, and output balance-delta enforcement.
+- Position creation and increase/decrease, ERC-721 ownership transfer, delegate authorization, liquidity lock paths, and grouped/single dividend claims.
+- Token interactions assume conventional ERC-20 transfer semantics except on the explicitly fee-on-transfer router paths. Malicious tokens, governance/DAO contracts, staking and sale contracts, and all non-Ethereum deployments are outside this review.
+
+## Findings
+
+### ANT-ETH-01: Fee-on-transfer ATF-output route checks the fee in input-token units
+
+**Severity: Medium. Status: confirmed and reproduced locally.**
+
+The fee-on-transfer router path `swapExactTokensForTokensSupportingFeeOnTransferTokens` calls `_swapSupportingFeeOnTransferTokens` and reverts only when its returned `totalFee` exceeds `params.maxFee` ([router entry point](https://eth.blockscout.com/address/0x6d9f0eb21d77c6d24be49a579508471e937d5418#code)). In the branch where `output == antfarmToken`, `_swapSupportingFeeOnTransferTokens` adds `amountIn * fee / 1000` to `totalFee`. Here `amountIn` is the input token's raw unit amount, measured from the pair balance delta.
+
+The receiving `AntfarmAtfPair.swap` instead calculates its actual ATF deduction from `amount0Out * fee / (1000 - fee)` because ATF is token0. The router has already reduced the gross output by `(1000 - fee) / 1000`, so this pair-side formula is an ATF-denominated output-side fee, not a fee on the input amount. It then removes that fee from the ATF reserve balance and accounts for 85% as claimable LP ATF and burns the remainder ([pair source embedded in the verified Factory source](https://eth.blockscout.com/address/0xe48aee124f9933661d4dd3eb265fa9e153e32cbe#code)). The standard router `_swap` path uses the output amount for this branch; only the supporting-fee-on-transfer path uses `amountIn`.
+
+This violates the router's user-facing `maxFee` bound: for pools where token decimals or exchange ratios make the ATF output fee exceed the raw input-unit estimate, the router accepts a fee above the caller's cap. A local isolated test compiled the verified source bundle using Solidity 0.8.10 with optimizer 1,000 runs and executed it on Ganache. With a synthetic 6-decimal input token that transfers 90% of the requested amount, a 50% fee pool, and `maxFee = 1 ATF`, the router estimate was `45,000,000` raw units (`0.000000000045 ATF`) while the pair accrued and burned `45.454545454545454545 ATF`; the transaction succeeded although actual fee exceeded the cap.
+
+The regression is in [antfarm-maxfee-regression.test.js](antfarm-maxfee-regression.test.js). It downloads only verified source for compilation; all transactions run in an in-memory local Ganache chain with synthetic assets. No live deployment was called to test or change state.
+
+**Remediation:** In the `output == antfarmToken` branch, accumulate the same ATF-denominated fee the pair will charge, based on the post-fee `amountOut` and `fee / (1000 - fee)`, with rounding that cannot understate the pair's charge. Add regression tests spanning input/output token decimal differences, transfer-tax inputs, and every allowed fee. Keep final `amountOutMin` checks as a separate output-protection condition.
+
+## Rejected hypotheses and limitations
+
+- The non-ATF router branch transfers the ATF fee from the caller before the pair swap; the pair checks the amount due against its oracle and records it as LP dividend liability plus burned ATF. This review did not find a separate reserve-accounting mismatch in that flow.
+- LP fee claims update the position's dividend checkpoint and reduce `antfarmTokenReserve` before ATF transfer. Position-level accounting and ERC-721 ownership authorization were traced through the verified Position source; no other confirmed defect was established in those paths.
+- The ATF pair's fixed-window oracle can encounter a zero elapsed-time division on its first update if the first swap follows the first liquidity mint within the same timestamp. This is a same-timestamp transient revert and depends on block ordering; it is not reported under the requested exclusion of exceptional environmental conditions.
+- No public state-changing calls were made. The review did not run the project’s historical full test suite because its source repository is unavailable. Findings are limited to the verified Ethereum factory/pair/router/position/token source family and the described synthetic local reproduction.

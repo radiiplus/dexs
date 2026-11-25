@@ -17,7 +17,7 @@ Each report below links to its source attribution section. Those sections cite t
 | Ethereum | KyberSwap Classic | [Report](ethereum/kyberswap-classic-ethereum.md#target-and-source); pinned DMM factory/pool/library/router source files and verified deployment source. |
 | Ethereum | KyberSwap Elastic | [Report](ethereum/kyberswap-elastic-ethereum.md#target-and-source); pinned Elastic V2 repository and source/deployment identity limit. |
 | Ethereum | PancakeSwap V2 | [Report](ethereum/pancakeswap-v2-ethereum.md#target-and-source); deployment docs, historical periphery files, and verified deployment source. |
-| Ethereum | PancakeSwap V3 | [Report](ethereum/pancakeswap-v3-ethereum.md#target-and-source); pinned core, periphery, position, and liquidity-mining source files. |
+| Ethereum | PancakeSwap V3 | [Report](ethereum/pancakeswap-v3-ethereum.md#target-and-source-attribution); pinned core/periphery files plus a local-fork regression with verified runtime matching. |
 | Ethereum | RadioShack | [Report](ethereum/radioshack-ethereum.md#source-and-target); contract and SDK repository file references, with build attribution caveat. |
 | Ethereum | SakeSwap | [Report](ethereum/sakeswap-ethereum.md#target-and-source); pinned repository and verified deployment/router source links. |
 | Ethereum | ShibaSwap V1 | [Report](ethereum/shibaswap-v1.md); source composition and unresolved deployment mapping are stated explicitly. |
@@ -32,5 +32,8 @@ Each report below links to its source attribution section. Those sections cite t
 | Ethereum | Unicly | [Report](ethereum/unicly-ethereum.md#target-and-source); pinned factory/pair/router/library files and Zap source. |
 | Ethereum | Verse | [Report](ethereum/verse-ethereum.md#target-and-source); verified factory/pair implementation/clone source, no repository attributed. |
 | Ethereum | SmarDex V1 and V2 | [Report](ethereum/smardex-ethereum.md#scope-and-source-attribution); both generations have distinct file URLs and deployment source links. |
+| Ethereum | WhiteSwap | [Report](ethereum/whiteswap-ethereum.md#target-and-source-attribution); pinned historical repository files plus current verified proxy and active logic source URLs. |
+| Ethereum | SaitaSwap | [Report](ethereum/saitaswap-ethereum.md#target-and-source-attribution); verified factory/pair sources; the router candidate with a different factory and init hash is excluded. |
+| Ethereum | SashimiSwap | [Report](ethereum/sashimiswap-ethereum.md#target-and-source-attribution); public repository attribution is separated from exact verified factory, pair, and router sources. |
 
-SafeMoonSwap Ethereum is a deferred target-attribution note, not a completed analysis: [status](ethereum/safemoon-ethereum-target-status.md).
+SafeMoonSwap, DegenSwap, and Surge Protocol Ethereum are deferred target-attribution notes, not completed analyses: [SafeMoon status](ethereum/safemoon-ethereum-target-status.md), [DegenSwap status](ethereum/degenswap-ethereum-target-status.md), [Surge Protocol status](ethereum/surge-protocol-eth-target-status.md).

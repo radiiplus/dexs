@@ -1,0 +1,46 @@
+# Trader Joe Liquidity Book V2.1 (Ethereum) Evidence Ledger
+
+## Target and Source Attribution
+
+- Chain: Ethereum mainnet; GeckoTerminal DEX ID `traderjoe-v2-1-ethereum`.
+- GeckoTerminal listed one pool on 2026-11-25: USDT/USDC pair `0x47b1cec2d2370e11b049c73ab6732f03e920c71a`, with about $568 reserve value in the API snapshot. The listing is not the protocol registry: the verified factory `0xDC8d77b69155c7E68A95a4fb0f06a71FF90B943a` returned 15 registered pairs at the local fork head.
+- The pair runtime is a 97-byte immutable-argument clone. Its embedded implementation is `0x7f89d5e94d6bd0351426e113fde9ef9ea678c186`; the factory also currently reports that implementation. Its runtime code hash at local fork head `26,492,232` was `0xbc7c8c866ff13fb8a13096bd48947a03d3d9101c58940428cef62837593fdb64`.
+- Blockscout labels the implementation `LBPair`, verified source, Solidity `0.8.10+commit.fc410830`, optimizer enabled. The explorer source body, after line-ending normalization, is byte-for-byte equal to the repository's [`LBPair.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/LBPair.sol) at release commit `c9589d0b4841be19f5988bd933248f8790f7b868` (`v2.1.1`). This is a source identity check against explorer-verified deployment code; the implementation was not independently recompiled in this pass.
+- The factory explorer source identifies `LBFactory`, Solidity `0.8.10`. The release source is [`LBFactory.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/LBFactory.sol). Other core files relevant to the accounting path are [`LBToken.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/LBToken.sol), [`BinHelper.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/libraries/BinHelper.sol), [`FeeHelper.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/libraries/FeeHelper.sol), [`PackedUint128Math.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/libraries/math/PackedUint128Math.sol), and [`ILBFlashLoanCallback.sol`](https://github.com/lfj-gg/joe-v2/blob/c9589d0b4841be19f5988bd933248f8790f7b868/src/interfaces/ILBFlashLoanCallback.sol).
+- The checked-out default branch is V2.2 and is not used to infer V2.1 behavior. V2.1.1 has no V2.2 hooks and has a distinct flash-loan fee allocation path. The report is limited to the implementation clone currently selected by this Ethereum factory and does not extend to other chains or later implementations.
+
+## Architecture and Execution Map
+
+- `LBFactory.createLBPair` validates preset/open status, quote-asset allowlisting, token distinction and price range; it sorts tokens for registry keys, deploys an immutable clone with `(tokenX, tokenY, binStep)` arguments, initializes it, then records the pair. Factory owner controls implementation, fee recipient, flash-loan fee, and per-pair static fee settings.
+- `LBPair` stores aggregate reserves, protocol fees, per-bin token reserves, per-bin LB-token supply, the non-empty-bin tree, active-bin/volatility parameters, and oracle samples. The clone supplies token addresses and bin step from immutable code arguments; logic is delegated to the factory-selected implementation.
+- Liquidity entry paths are `mint` and `burn`. Callers transfer assets before `mint`; the pair derives received amounts from actual token balances minus aggregate reserves, mints per-bin shares, updates per-bin/aggregate accounting, and refunds unused amounts. `burn` burns approved per-bin LB units and redeems their pro-rata bin reserves.
+- `swap` is permissionless and non-reentrant. It measures input as actual balance minus recorded reserves, walks bins in price order, calculates fees and output, assigns the configured protocol share to `_protocolFees`, updates bin and aggregate balances, updates the oracle/active ID, and transfers output.
+- `flashLoan` is permissionless and non-reentrant. It transfers requested amounts, calls the receiver, requires the exact callback success marker, and checks final balances against pre-loan aggregate reserves plus rounded-up fees. The V2.1.1 implementation assigns the configured protocol share to `_protocolFees` and credits the remainder to the active bin. Any failed callback or inadequate repayment reverts the token transfers and all nested state changes.
+- `collectProtocolFees` is restricted to the factory fee recipient and leaves one smallest unit per nonzero token side in the protocol-fee balance, avoiding edge issues in packed subtraction. `increaseOracleLength` is public but changes oracle capacity only. Fee-parameter changes and `forceDecay` are factory-only.
+
+## Critical Invariants
+
+- For each token, external balance should equal `_reserves`, except for unsynchronized donations or token-specific behavior. The public `getReserves()` view subtracts `_protocolFees`; therefore the comparable tracked total is `getReserves() + getProtocolFees()`. `_reserves` is the aggregate total, not an additional quantity to add to per-bin balances.
+- Per-bin reserves and per-bin LB-token supply must move together: minting increases reserves and issues shares; burning destroys shares and transfers no more than the burned share's rounded-down pro-rata reserve amount.
+- Swap input is measured from actual balances. Output, LP fee retention and protocol fee allocation must sum to the received input value, and the pair must not persist an aggregate reserve update that exceeds post-transfer balances.
+- A flash loan must end with each token balance at least its prior aggregate reserve plus the rounded-up fee. Only after that check may the pair checkpoint aggregate balances and split fees between protocol and active-bin accounting.
+- Failed callbacks and failed settlement checks must roll back token movements, bin changes, fee changes, and reserve updates atomically.
+- Oracle and active-bin state may affect price and fee selection, but oracle updates must not create token balances or bypass the external-balance settlement rules.
+
+## Findings
+
+No confirmed implementation defect was identified in the scoped V2.1.1 Ethereum implementation. No severity is assigned. This conclusion is bounded to the source and paths reviewed here and is not an audit of every integrating router, token behavior, governance action, or external oracle consumer.
+
+## Reviewed Candidates and Rejections
+
+- **Flash-loan callback can retain principal while returning success:** disproven by the final-balance check in `LBPair.flashLoan` (source lines 567-614). The local test's callback returned the required marker but did not repay; the call reverted and both pair token balances, reserves, and protocol fee accounting remained unchanged.
+- **Flash-loan fees are omitted from reserves or double-counted:** not supported by the source. On successful settlement, `balancesAfter` includes the principal repayment and full fees; it becomes `_reserves`, while the protocol fee slice is also placed in `_protocolFees` and the remainder in the active bin. `getReserves()` explicitly subtracts protocol fees, so callers must not compare it alone to external balances.
+- **Direct pair swap skips slippage checks and therefore transfers value without settlement:** the pair API expects pre-transferred input and enforces bin liquidity; user slippage protection belongs to the router. No router call path or user-facing execution was established as an unauthorized pair transfer. This is an integration boundary, not a pair defect by itself.
+- **Public oracle-length growth creates a price or accounting manipulation:** `increaseOracleLength` changes sample capacity, not token reserves or active price. No financial invariant violation was found from this entry point.
+- **Low-bin-step/packed-width values bypass validation:** factory validates price computation for `activeId`, requires a configured preset and valid quote asset; liquidity configuration decoding bounds each distribution to `1e18`, and bin amounts/reserves use checked packing. No violating input was reproduced.
+
+## Isolated Validation and Limits
+
+- `traderjoe-v2-1-ethereum-fork.test.js` forked latest Ethereum state locally at block `26,492,232`. It enumerated all 15 factory pairs, confirmed each had code, reported each pair runtime hash, checked factory identity and embedded implementation address, and compared token balances with `getReserves() + getProtocolFees()` for both sides. All 15 reconciled with zero drift; the GeckoTerminal USDT/USDC pair was present.
+- The same local fork deployed a synthetic callback contract that acknowledged a flash loan but intentionally retained the borrowed amount. The loan reverted; before/after pair token balances, `getReserves()`, and `getProtocolFees()` were equal. No public transaction was sent. This is a rollback/guard characterization, not a successful paid-flash-loan profit test.
+- Ganache used the JavaScript fallback because its optional µWS binary is unavailable for Node `v24.22.2`. No anomalous behavior was observed in the fork run. A full successful flash-loan fee distribution test and exhaustive bin/share enumeration were not performed.

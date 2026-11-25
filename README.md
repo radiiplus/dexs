@@ -68,4 +68,14 @@ Severity is assigned only where the report contains an explicit severity assessm
 - [Surge Protocol Ethereum](ethereum/surge-protocol-eth-target-status.md): the Ethereum DEX endpoint currently returns no pools and no Ethereum implementation was attributable. Not counted as analyzed.
 - [Source index](SOURCE-INDEX.md) lists the repositories and exact source file URLs used for every completed review. Reports for deployments without an accessible matching repository cite their verified explorer source files and disclose the attribution limit.
 
+## Lending Research
+
+- [Ethereum lending index](ethereum/lending/README.md): DeFiLlama Ethereum Lending universe and protocol queue (168 entries observed 2026-11-25).
+- [Aave V3](ethereum/lending/aave-v3.md): analyzed; Ethereum deployment only.
+- [Morpho Blue](ethereum/lending/morpho-blue.md): analyzed; Ethereum singleton only, with a documented but unverified low-borrow-share liveness risk.
+- [SparkLend](ethereum/lending/sparklend.md): analyzed; Ethereum Pool revision 4, including Spark bridge paths.
+- [Maple](ethereum/lending/maple.md): analyzed on Ethereum through the syrupUSDC Pool, its PoolManager, withdrawal queue, and open-term loan accounting.
+- [Compound V3](ethereum/lending/compound-v3.md): analyzed on Ethereum through the USDC-base Comet market and its active extended-asset-list implementation.
+- [Venus Core Pool](ethereum/lending/venus-core-pool.md): analyzed on Ethereum through its active beacon-based Comptroller and 23 vToken markets.
+
 Regression and reproduction artifacts are stored under `ethereum/` alongside their corresponding report. 9inch's exact-source 77-pair accounting sweep is `ethereum/9inch-ethereum-fork.test.js`; Antfarm's isolated max-fee regression is `ethereum/antfarm-maxfee-regression.test.js`; Bitswap's iZiSwap source-runtime and fork-state check is `ethereum/bitswap-iziswap-ethereum-fork.test.js`; JustMoney's partial-source 15-pair balance/reserve sweep is `ethereum/justmoney-ethereum-fork.test.js`; LIF3 V3's source-matched factory-created pool principal-width reproduction is `ethereum/lif3-v3-principal-width-fork.test.js`; Pepedex's 26-pair fork characterization is `ethereum/pepedex-ethereum-fork.test.js`; SakeSwap's deployed-bytecode pool sweep and flash-swap regression is `ethereum/sakeswap-gecko-pools-fork.test.js`; Solidly V3's verified-source burn and flash-fee width regression is `ethereum/solidly-v3-ethereum-fork.test.js`; SushiSwap V3's verified-runtime principal-width regression is `ethereum/sushiswap-v3-owed-width-fork.test.js`; Trader Joe V2.1's 15-pair accounting and underpaid-flash-loan rollback check is `ethereum/traderjoe-v2-1-ethereum-fork.test.js`; WAGMI V3's factory-created pool principal-width reproduction is `ethereum/wagmi-v3-principal-width-fork.test.js`; X7's repeatable fee-mint regression is `ethereum/x7-finance-mintfee-regression.test.js`.

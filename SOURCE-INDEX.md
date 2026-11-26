@@ -39,7 +39,7 @@ Each report below links to its source attribution section. Those sections cite t
 | Ethereum | SmarDex V1 and V2 | [Report](ethereum/smardex-ethereum.md#scope-and-source-attribution); both generations have distinct file URLs and deployment source links. |
 | Ethereum | WhiteSwap | [Report](ethereum/whiteswap-ethereum.md#target-and-source-attribution); pinned historical repository files plus current verified proxy and active logic source URLs. |
 | Ethereum | WAGMI V3 | [Report](ethereum/wagmi-v3-ethereum.md#target-and-source-attribution); official contract table, verified factory, pinned Popsicle core source, and local factory-created pool reproduction; pool source/runtime has a small unresolved mismatch. |
-| Ethereum | X7 Finance Xchange | [Report](ethereum/x7-finance-ethereum.md#target-and-source); pinned X7 monorepo factory/pair/router sources and Sourcify partial matches for the Ethereum factory and pair. |
+| Ethereum | X7 Finance Xchange | [Report](ethereum/x7-finance-ethereum.md#target-and-source); pinned X7 monorepo factory/pair/router sources, Sourcify partial matches, factory-wide Ganache sweep, and a second-pair pinned Anvil reproduction. |
 | Ethereum | SaitaSwap | [Report](ethereum/saitaswap-ethereum.md#target-and-source-attribution); verified factory/pair sources; the router candidate with a different factory and init hash is excluded. |
 | Ethereum | SashimiSwap | [Report](ethereum/sashimiswap-ethereum.md#target-and-source-attribution); public repository attribution is separated from exact verified factory, pair, and router sources. |
 | Ethereum | SushiSwap V3 | [Report](ethereum/sushiswap-v3-ethereum.md#target-and-source-attribution); sampled pool and factory have Sourcify runtime matches, exact pinned core source match, and local recompilation. |
@@ -47,3 +47,9 @@ Each report below links to its source attribution section. Those sections cite t
 | Ethereum | Trader Joe Liquidity Book V2.1 | [Report](ethereum/traderjoe-v2-1-ethereum.md#target-and-source-attribution); Ethereum implementation source matches the pinned V2.1.1 repository source, with clone runtime and fork-state checks. |
 
 SafeMoonSwap, DegenSwap, and Surge Protocol Ethereum are deferred target-attribution notes, not completed analyses: [SafeMoon status](ethereum/safemoon-ethereum-target-status.md), [DegenSwap status](ethereum/degenswap-ethereum-target-status.md), [Surge Protocol status](ethereum/surge-protocol-eth-target-status.md).
+
+## Cross-Protocol Research
+
+- [Ethereum composability search](ethereum/composability-search.md): evidence ledger for DEX state discrepancies, lending/settlement payout nodes, current address intersections, local reproduction status, and rejected multi-protocol synthesis attempts. This is a discovery ledger, not an additional DEX count.
+- [Composability claims validation](ethereum/composability-claims-validation.md): independent source and fork validation of the eight supplied candidate chains.
+- [Ethervista local fork characterization](ethereum/ethervista-k-boundary-fork-test.js): checks the sampled pair's wrapped-width invariant and current router settlement on a local fork; no public deployment is mutated.

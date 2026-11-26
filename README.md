@@ -60,6 +60,10 @@ Severity is assigned only where the report contains an explicit severity assessm
 - [WhiteSwap](ethereum/whiteswap-ethereum.md)
 - [X7 Finance Xchange](ethereum/x7-finance-ethereum.md)
 
+## Cross-Chain Research
+
+- [Cross-chain research options](cross-chain-options.md): chain and protocol screening with a local Jupiter Lend/JLP fork model. The JLP liquidation path remains unclosed and no profit or confirmed defect is claimed.
+
 ## Deferred Target Attribution
 
 - [SafeMoonSwap Ethereum](ethereum/safemoon-ethereum-target-status.md): no pool is currently listed; no Ethereum DEX deployment/source was attributed. Not counted as analyzed.

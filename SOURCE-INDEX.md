@@ -50,6 +50,7 @@ SafeMoonSwap, DegenSwap, and Surge Protocol Ethereum are deferred target-attribu
 
 ## Cross-Protocol Research
 
+- [Cross-chain research options](cross-chain-options.md): BNB/Solana and other-chain screening, plus the local Jupiter JLP liquidation simulation. It records a synthetic threshold crossing and an incomplete unwind, not a confirmed finding or profitable loop.
 - [Ethereum composability search](ethereum/composability-search.md): evidence ledger for DEX state discrepancies, lending/settlement payout nodes, current address intersections, local reproduction status, and rejected multi-protocol synthesis attempts. This is a discovery ledger, not an additional DEX count.
 - [Composability claims validation](ethereum/composability-claims-validation.md): independent source and fork validation of the eight supplied candidate chains.
 - [Ethervista local fork characterization](ethereum/ethervista-k-boundary-fork-test.js): checks the sampled pair's wrapped-width invariant and current router settlement on a local fork; no public deployment is mutated.

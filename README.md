@@ -63,6 +63,7 @@ Severity is assigned only where the report contains an explicit severity assessm
 ## Cross-Chain Research
 
 - [Cross-chain research options](cross-chain-options.md): chain and protocol screening with a local Jupiter Lend/JLP fork model. The JLP liquidation path remains unclosed and no profit or confirmed defect is claimed.
+- [Jupiter Lend Smart Vaults](solana/jupiter-lend-dex-vaults.md): native T2/T3 DEX-integrated Vault operation mapping and local Surfpool deposit/swap/withdraw and smart-debt characterization; no invariant violation confirmed.
 
 ## Deferred Target Attribution
 

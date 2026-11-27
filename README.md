@@ -64,7 +64,7 @@ Severity is assigned only where the report contains an explicit severity assessm
 
 - [Cross-chain research options](cross-chain-options.md): chain and protocol screening with a local Jupiter Lend/JLP fork model. The JLP liquidation path remains unclosed and no profit or confirmed defect is claimed.
 - [Jupiter Lend Smart Vaults](solana/jupiter-lend-dex-vaults.md): native T2/T3 DEX-integrated Vault operation mapping and local Surfpool deposit/swap/withdraw and smart-debt characterization; no invariant violation confirmed.
-- [Assumption-collapse reassessment](assumption-screen.md): separate protocol-by-protocol screens for restoration dependence, externally mutable accounting inputs, and oracle source lineage across analyzed DEXes and lending markets.
+- [Assumption-collapse reassessment](assumption-screen.md): market-matched review of the analyzed DEX and lending candidates, with exact asset/pool intersections, payout prerequisites, and protocol-specific follow-ups.
 
 ## Deferred Target Attribution
 

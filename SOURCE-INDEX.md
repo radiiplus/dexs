@@ -50,7 +50,7 @@ SafeMoonSwap, DegenSwap, and Surge Protocol Ethereum are deferred target-attribu
 
 ## Cross-Protocol Research
 
-- [Assumption-collapse reassessment](assumption-screen.md): per-protocol A/B/C screening of time dependence, externally mutable accounting state, and oracle lineage; conclusions are bounded to existing evidence ledgers.
+- [Assumption-collapse reassessment](assumption-screen.md): market-matched review of analyzed candidates, exact asset/pool intersections, payout prerequisites, and protocol-specific follow-ups.
 - [Jupiter Lend Smart Vaults (Solana)](solana/jupiter-lend-dex-vaults.md): mainnet program-data ELF hashes matched to the local Surfpool fork; published IDL/SDK operation map and local T2/T3 state-transition tests. Smart-handler source attribution remains incomplete.
 - [Cross-chain research options](cross-chain-options.md): BNB/Solana and other-chain screening, plus the local Jupiter JLP liquidation simulation. It records a synthetic threshold crossing and an incomplete unwind, not a confirmed finding or profitable loop.
 - [Ethereum composability search](ethereum/composability-search.md): evidence ledger for DEX state discrepancies, lending/settlement payout nodes, current address intersections, local reproduction status, and rejected multi-protocol synthesis attempts. This is a discovery ledger, not an additional DEX count.

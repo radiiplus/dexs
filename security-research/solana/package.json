@@ -1,0 +1,15 @@
+{
+  "name": "jupiter-lend-local-probes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:fee-phase": "node jupiter-lend-fee-phase-probe.mjs"
+  },
+  "dependencies": {
+    "@jup-ag/lend": "0.4.0",
+    "@solana/spl-token": "0.4.15",
+    "@solana/surfpool": "1.7.0",
+    "@solana/web3.js": "1.99.0",
+    "bn.js": "5.2.5"
+  }
+}

@@ -62,8 +62,14 @@ Severity is assigned only where the report contains an explicit severity assessm
 
 ## Cross-Chain Research
 
+- [Compositional boundary-and-value lens](security-research/compositional-boundary-value-lens.md): unified method for accepted/rejected domains, cross-layer composition, low-level representation, backward reasoning, and invariant testing.
 - [Cross-chain research options](cross-chain-options.md): chain and protocol screening with a local Jupiter Lend/JLP fork model. The JLP liquidation path remains unclosed and no profit or confirmed defect is claimed.
 - [Jupiter Lend Smart Vaults](solana/jupiter-lend-dex-vaults.md): native T2/T3 DEX-integrated Vault operation mapping and local Surfpool deposit/swap/withdraw and smart-debt characterization; no invariant violation confirmed.
+- [Sui DeepBook V3](security-research/sui/deepbook-v3-screen.md)
+- [Sui Scallop flash loans](security-research/sui/scallop-lending-flash-loan-screen.md)
+- [Sui Turbos liquidity vault](security-research/sui/turbos-vault-share-screen.md)
+- [Sui Cetus CLMM](security-research/sui/cetus-clmm-flash-loan-screen.md): v15 bytecode/source verification and local flash-loan boundary tests; zero-liquidity fee allocation gap reproduced, with no payout path demonstrated.
+- [BNB nested-operation screen](security-research/bnb/nested-operations-screen.md)
 - [Assumption-collapse reassessment](assumption-screen.md): market-matched review of the analyzed DEX and lending candidates, with exact asset/pool intersections, payout prerequisites, and protocol-specific follow-ups.
 
 ## Deferred Target Attribution
